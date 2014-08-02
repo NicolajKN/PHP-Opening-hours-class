@@ -1,0 +1,2 @@
+PHP-Opening-hours-class
+=======================
