@@ -71,12 +71,13 @@ class OpeningHours
             $hoursArray[ $day ] = $hours[ $day ];
         }
         
-        // Return the generated array
+        // Save the generated array
         $this->hours = $hoursArray;
         
     }
     
     public function setExceptions( $exceptions ) {
+        // Simply save the exception array directly
         $this->exceptions = $exceptions;
     }
     
