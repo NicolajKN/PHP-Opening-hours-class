@@ -11,9 +11,11 @@ class OpeningHours
     
     public $hours;
     private $dayNames = array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' );
+    private $timezone;
     
-    public function OpeningHours() {
-        
+    
+    public function OpeningHours( $timezone = 'UTC' ) {
+        $this->timezone = new DateTimeZone( $timezone );
     }
     
     public function setHours( $hours ) 
@@ -36,6 +38,20 @@ class OpeningHours
         
         $this->hours = $hoursArray;
         
+    }
+    
+    private function getWeekDay( $date ) {
+        return $date->format( 'D' );
+    }
+    
+    public function getHours( $date = null ) {
+        if ( $date == null ) {
+            $date = new DateTime( 'today', $this->timezone );
+        }
+        
+        $dayOfWeek = $this->getWeekDay( $date );
+        
+        return $this->hours[ $dayOfWeek ];
     }
     
 }
