@@ -72,6 +72,46 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
         $this->assertEquals( $hours, $hoursIn[ $weekday ] );
     }
     
+    /**
+     * @dataProvider exceptionsData
+     */
+    public function testGetHoursWithException( $hours, $exceptions ) {
+        
+        $decTwentyThird = new DateTime( '2014/12/23', new DateTimeZone( 'UTC' ));
+        $janFirst = new DateTime( '2014/1/1', new DateTimeZone( 'UTC' ));
+        
+        
+        $openingHours = new OpeningHours();
+        
+        $openingHours->setHours( $hours );
+        $openingHours->setExceptions( $exceptions );
+        
+        $hours = $openingHours->getHours( $decTwentyThird );
+         
+        $this->assertEquals( $hours, $exceptions[ '2014/12/23' ] );
+        
+        $hours = $openingHours->getHours( $janFirst );
+        
+        $this->assertEquals( $hours, $exceptions[ '2014/1/1' ] );
+    }
+    
+    
+    public function exceptionsData() {
+        $hours = $this->hoursData();
+        
+        $exceptions = array(
+        	'2014/1/1'   => array( null ),
+            '2014/12/23' => array( '7:30', '20:00' )
+        );
+        
+        return array(
+            array(
+            	$hours[ 0 ][ 0 ],
+                $exceptions
+            )
+        );
+    }
+    
     public function hoursData() {
         $hours = array(
             array(

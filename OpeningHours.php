@@ -2,14 +2,15 @@
 
 /**
  * Handles business hours for displaying on websites
- * in variours ways.
+ * in various ways.
  *
  * @author NicolajKN
  */
 class OpeningHours 
 {
     
-    public $hours;
+    public $hours = array();
+    public $exceptions = array();
     private $dayNames = array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' );
     private $timezone;
     
@@ -40,18 +41,53 @@ class OpeningHours
         
     }
     
+    public function setExceptions( $exceptions ) {
+        $this->exceptions = $exceptions;
+    }
+    
     private function getWeekDay( $date ) {
         return $date->format( 'D' );
     }
     
+    public function getException( $date ) {
+        
+        $compareFormat = 'YY/MM/DD';
+        
+        $dateFormatted = $date->format( $compareFormat );
+        
+        foreach ( $this->exceptions as $exDate => $exHours ) {
+            $exDateObj = new DateTime( $exDate, $this->timezone );
+            $exDateFormatted = $exDateObj->format( $compareFormat );
+            
+            if ( $dateFormatted == $exDateFormatted ) {
+                return $exHours;
+            }
+        }
+        
+        return false;
+    }
+    
     public function getHours( $date = null ) {
+        
+        // Fall back to today for the date
         if ( $date == null ) {
             $date = new DateTime( 'today', $this->timezone );
         }
         
-        $dayOfWeek = $this->getWeekDay( $date );
+        // Get the exception for the date
+        $exception = $this->getException( $date );
         
-        return $this->hours[ $dayOfWeek ];
+        if ( ! $exception ) {
+            // Normal opening hours are retrieved by the weekday
+            $dayOfWeek = $this->getWeekDay( $date );
+        
+        	return $this->hours[ $dayOfWeek ]; 
+        } else {
+            // Exception hours are returned directly
+            return $exception;
+        }
+        
+
     }
     
 }
