@@ -44,13 +44,17 @@ class OpeningHours
         return false;
     }
     
-    public function OpeningHours( $timezone = null ) {
-        if ( $timezone == null ) {
-            // Default to UTC
-            $this->timezone = new DateTimeZone( 'UTC' );
-        } else {
-            $this->timezone = $timezone;
-        }
+    public function OpeningHours( $hours ) {
+        
+        // Set the default timezone
+        $this->setTimeZone( 'UTC' );
+        
+        // Set the hours given
+        $this->setHours( $hours );
+    }
+    
+    public function setTimeZone ( $timezone ) {
+        $this->timezone = new DateTimeZone( $timezone );
     }
     
     public function setHours( $hours ) 
