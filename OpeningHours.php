@@ -9,14 +9,48 @@
 class OpeningHours 
 {
     
-    public $hours = array();
-    public $exceptions = array();
+    public  $hours = array();
+    public  $exceptions = array();
     private $dayNames = array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' );
     private $timezone;
     
+    private function getWeekDay( $date ) {
+        return $date->format( 'D' );
+    }
     
-    public function OpeningHours( $timezone = 'UTC' ) {
-        $this->timezone = new DateTimeZone( $timezone );
+    private function getException( $date ) {
+        
+        // Date format to make string comparison against
+        $compareFormat = 'YY/MM/DD';
+        
+        // Get the supplied date in the compare format
+        $dateFormatted = $date->format( $compareFormat );
+        
+        foreach ( $this->exceptions as $exDate => $exHours ) {
+            
+            // Create a DateTime object from the exception date
+            $exDateObj = new DateTime( $exDate, $this->timezone );
+            
+            // Create a comparable string of the exception DateTime object
+            $exDateFormatted = $exDateObj->format( $compareFormat );
+            
+            // If there is a match, return
+            if ( $dateFormatted == $exDateFormatted ) {
+                return $exHours;
+            }
+        }
+  
+        // Fall back to false if nothing is found
+        return false;
+    }
+    
+    public function OpeningHours( $timezone = null ) {
+        if ( $timezone == null ) {
+            // Default to UTC
+            $this->timezone = new DateTimeZone( 'UTC' );
+        } else {
+            $this->timezone = $timezone;
+        }
     }
     
     public function setHours( $hours ) 
@@ -37,34 +71,13 @@ class OpeningHours
             $hoursArray[ $day ] = $hours[ $day ];
         }
         
+        // Return the generated array
         $this->hours = $hoursArray;
         
     }
     
     public function setExceptions( $exceptions ) {
         $this->exceptions = $exceptions;
-    }
-    
-    private function getWeekDay( $date ) {
-        return $date->format( 'D' );
-    }
-    
-    public function getException( $date ) {
-        
-        $compareFormat = 'YY/MM/DD';
-        
-        $dateFormatted = $date->format( $compareFormat );
-        
-        foreach ( $this->exceptions as $exDate => $exHours ) {
-            $exDateObj = new DateTime( $exDate, $this->timezone );
-            $exDateFormatted = $exDateObj->format( $compareFormat );
-            
-            if ( $dateFormatted == $exDateFormatted ) {
-                return $exHours;
-            }
-        }
-        
-        return false;
     }
     
     public function getHours( $date = null ) {
@@ -86,9 +99,6 @@ class OpeningHours
             // Exception hours are returned directly
             return $exception;
         }
-        
-
     }
-    
 }
 
