@@ -11,12 +11,10 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
     public function testSetHoursIgnoresUnknownHashes( $hours )
     {
         
-        $openingHours = new OpeningHours();
-        
         $hoursIn = $hours;
         $hoursIn[ 'Pit' ] = array('1:42', '15:11');
         
-        $openingHours->setHours( $hoursIn );
+        $openingHours = new OpeningHours( $hoursIn );
         
         $this->assertEquals( $openingHours->hours, $hours );
     }
@@ -27,15 +25,12 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
      */
     public function testSetHoursFailsOnMissingDays( $hours )
     {
-        
-        $openingHours = new OpeningHours();
-        
+
         $hoursIn = $hours;
-        
         array_splice( $hoursIn, 3, 1 );
         
-        $openingHours->setHours( $hoursIn );
-                
+        $openingHours = new OpeningHours( $hoursIn );
+
     }
     
     /**
@@ -43,12 +38,10 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
      */
     public function testGetHoursForASpecificDate( $hoursIn ) {
         
-        $openingHours = new OpeningHours();
-        
         // Should be a saturday
         $date = new DateTime( '2000/07/01', new DateTimeZone( 'Europe/Copenhagen' ) );
         
-        $openingHours->setHours( $hoursIn );
+        $openingHours = new OpeningHours( $hoursIn );
         
         $hours = $openingHours->getHours( $date );
          
@@ -60,9 +53,8 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
      */
     public function testGetHoursWithoutADate( $hoursIn ) {
         
-        $openingHours = new OpeningHours();
-        
-        $openingHours->setHours( $hoursIn );
+
+        $openingHours = new OpeningHours( $hoursIn );
         
         $hours = $openingHours->getHours();
         
@@ -70,6 +62,44 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
         $weekday = $today->format( 'D' );
          
         $this->assertEquals( $hours, $hoursIn[ $weekday ] );
+    }
+    
+    /**
+     * @dataProvider exceptionsData
+     */
+    public function testGetHoursWithException( $hours, $exceptions ) {
+        
+        $decTwentyThird = new DateTime( '2014/12/23', new DateTimeZone( 'UTC' ));
+        $janFirst = new DateTime( '2014/1/1', new DateTimeZone( 'UTC' ));
+        
+        $openingHours = new OpeningHours( $hours );
+        
+        $openingHours->setExceptions( $exceptions );
+        
+        $hours = $openingHours->getHours( $decTwentyThird );
+         
+        $this->assertEquals( $hours, $exceptions[ '2014/12/23' ] );
+        
+        $hours = $openingHours->getHours( $janFirst );
+        
+        $this->assertEquals( $hours, $exceptions[ '2014/1/1' ] );
+    }
+    
+    
+    public function exceptionsData() {
+        $hours = $this->hoursData();
+        
+        $exceptions = array(
+        	'2014/1/1'   => array( null ),
+            '2014/12/23' => array( '7:30', '20:00' )
+        );
+        
+        return array(
+            array(
+            	$hours[ 0 ][ 0 ],
+                $exceptions
+            )
+        );
     }
     
     public function hoursData() {

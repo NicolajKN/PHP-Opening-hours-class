@@ -2,19 +2,58 @@
 
 /**
  * Handles business hours for displaying on websites
- * in variours ways.
+ * in various ways.
  *
  * @author NicolajKN
  */
 class OpeningHours 
 {
     
-    public $hours;
+    public  $hours = array();
+    public  $exceptions = array();
     private $dayNames = array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' );
     private $timezone;
     
+    private function getWeekDay( $date ) {
+        return $date->format( 'D' );
+    }
     
-    public function OpeningHours( $timezone = 'UTC' ) {
+    private function getException( $date ) {
+        
+        // Date format to make string comparison against
+        $compareFormat = 'YY/MM/DD';
+        
+        // Get the supplied date in the compare format
+        $dateFormatted = $date->format( $compareFormat );
+        
+        foreach ( $this->exceptions as $exDate => $exHours ) {
+            
+            // Create a DateTime object from the exception date
+            $exDateObj = new DateTime( $exDate, $this->timezone );
+            
+            // Create a comparable string of the exception DateTime object
+            $exDateFormatted = $exDateObj->format( $compareFormat );
+            
+            // If there is a match, return
+            if ( $dateFormatted == $exDateFormatted ) {
+                return $exHours;
+            }
+        }
+  
+        // Fall back to false if nothing is found
+        return false;
+    }
+    
+    public function OpeningHours( $hours ) {
+        
+        // Set the default timezone
+        $this->setTimeZone( 'UTC' );
+        
+        // Set the hours given
+        $this->setHours( $hours );
+    }
+    
+    public function setTimeZone ( $timezone ) {
         $this->timezone = new DateTimeZone( $timezone );
     }
     
@@ -36,23 +75,35 @@ class OpeningHours
             $hoursArray[ $day ] = $hours[ $day ];
         }
         
+        // Save the generated array
         $this->hours = $hoursArray;
         
     }
     
-    private function getWeekDay( $date ) {
-        return $date->format( 'D' );
+    public function setExceptions( $exceptions ) {
+        // Simply save the exception array directly
+        $this->exceptions = $exceptions;
     }
     
     public function getHours( $date = null ) {
+        
+        // Fall back to today for the date
         if ( $date == null ) {
             $date = new DateTime( 'today', $this->timezone );
         }
         
-        $dayOfWeek = $this->getWeekDay( $date );
+        // Get the exception for the date
+        $exception = $this->getException( $date );
         
-        return $this->hours[ $dayOfWeek ];
+        if ( ! $exception ) {
+            // Normal opening hours are retrieved by the weekday
+            $dayOfWeek = $this->getWeekDay( $date );
+        
+        	return $this->hours[ $dayOfWeek ]; 
+        } else {
+            // Exception hours are returned directly
+            return $exception;
+        }
     }
-    
 }
 
