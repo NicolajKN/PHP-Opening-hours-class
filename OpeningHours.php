@@ -13,6 +13,7 @@ class OpeningHours
     public  $exceptions = array();
     private $dayNames = array( 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun' );
     private $timezone;
+    private $dateFormat = 'Y/m/d';
     
     private function getWeekDay( $date ) {
         return $date->format( 'D' );
@@ -20,11 +21,8 @@ class OpeningHours
     
     private function getException( $date ) {
         
-        // Date format to make string comparison against
-        $compareFormat = 'YY/MM/DD';
-        
         // Get the supplied date in the compare format
-        $dateFormatted = $date->format( $compareFormat );
+        $dateFormatted = $date->format( $this->dateFormat );
         
         foreach ( $this->exceptions as $exDate => $exHours ) {
             
@@ -32,7 +30,7 @@ class OpeningHours
             $exDateObj = new DateTime( $exDate, $this->timezone );
             
             // Create a comparable string of the exception DateTime object
-            $exDateFormatted = $exDateObj->format( $compareFormat );
+            $exDateFormatted = $exDateObj->format( $this->dateFormat );
             
             // If there is a match, return
             if ( $dateFormatted == $exDateFormatted ) {
@@ -105,5 +103,28 @@ class OpeningHours
             return $exception;
         }
     }
+    
+    public function getHoursArray( $dateFrom, $dateTo ) {
+        
+        $hours = array();
+        
+        // Ensure that $dateTo is included in the array
+        $dateTo = $dateTo->modify( '+1 day' ); 
+        
+        // Iterate 1 day at the time
+        $dateInterval = new DateInterval( 'P1D' );
+        
+        // Create a traversable date range
+        $dateRange = new DatePeriod( $dateFrom, $dateInterval, $dateTo );
+        
+        foreach( $dateRange as $date ) {
+            $dateString = $date->format( $this->dateFormat );
+            $hours[ $dateString ] = $this->getHours( $date );
+        }
+        
+        return $hours;
+        
+    }
+    
 }
 
