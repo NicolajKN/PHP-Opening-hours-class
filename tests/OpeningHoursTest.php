@@ -69,7 +69,7 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
     public function testGetHoursWithException( $hours, $exceptions ) {
         
         $decTwentyThird = new DateTime( '2014/12/23', new DateTimeZone( 'UTC' ));
-        $janFirst = new DateTime( '2014/1/1', new DateTimeZone( 'UTC' ));
+        $janFirst = new DateTime( '2014/01/01', new DateTimeZone( 'UTC' ));
         
         $openingHours = new OpeningHours( $hours );
         
@@ -81,7 +81,7 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
         
         $hours = $openingHours->getHours( $janFirst );
         
-        $this->assertEquals( $hours, $exceptions[ '2014/1/1' ] );
+        $this->assertEquals( $hours, $exceptions[ '2014/01/01' ] );
     }
     
     /**
@@ -89,21 +89,21 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
      */
     public function testGetHoursArray( $hours, $exceptions ) {
         
-        $dateFrom = new DateTime( '2014/12/22' );
-        $dateTo   = new DateTime( '2015/1/1' );
+        $dateFrom = new DateTime( '2014/12/22', new DateTimeZone( 'UTC' ) );
+        $dateTo   = new DateTime( '2015/01/01', new DateTimeZone( 'UTC' ) );
         
         $expectedArray = array(
-        	'2014/12/22' => array(),
-        	'2014/12/23' => array(),
-        	'2014/12/24' => array(),
-        	'2014/12/25' => array(),
-        	'2014/12/26' => array(),
-        	'2014/12/27' => array(),
-        	'2014/12/28' => array(),
-        	'2014/12/29' => array(),
-        	'2014/12/30' => array(),
-        	'2014/12/31' => array(),
-        	'2015/1/1' => array()
+        	'2014/12/22' => $hours[ 'Mon' ] ,
+        	'2014/12/23' => array( '7:30', '20:00' ),
+        	'2014/12/24' => $hours[ 'Wed' ],
+        	'2014/12/25' => $hours[ 'Thu' ],
+        	'2014/12/26' => $hours[ 'Fri' ],
+        	'2014/12/27' => $hours[ 'Sat' ],
+        	'2014/12/28' => $hours[ 'Sun' ],
+        	'2014/12/29' => $hours[ 'Mon' ],
+        	'2014/12/30' => $hours[ 'Tue' ],
+        	'2014/12/31' => $hours[ 'Wed' ],
+        	'2015/01/01' => $hours[ 'Thu' ]
         );
         
         $openingHours = new OpeningHours( $hours );
@@ -112,8 +112,22 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
         
         $hoursArray = $openingHours->getHoursArray( $dateFrom, $dateTo );
          
-        $this->assertEquals( $hours, $exceptions[ '2014/12/23' ] );
+        $this->assertEquals( $hoursArray, $expectedArray );
         
+    }
+    
+    /**
+     * @dataProvider exceptionsData
+     */
+    public function testGetHoursArrayInvertedDates( $hours, $exceptions ) {
+        
+        $dateFrom = new DateTime( '2015/12/22', new DateTimeZone( 'UTC' ) );
+        $dateTo   = new DateTime( '2015/01/01', new DateTimeZone( 'UTC' ) );
+        
+        $openingHours = new OpeningHours( $hours );
+        
+        $hoursArray = $openingHours->getHoursArray( $dateFrom, $dateTo );
+         
     }
     
     
@@ -121,7 +135,7 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
         $hours = $this->hoursData();
         
         $exceptions = array(
-        	'2014/1/1'   => array( null ),
+        	'2014/01/01'   => array( null ),
             '2014/12/23' => array( '7:30', '20:00' )
         );
         
