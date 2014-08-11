@@ -38,14 +38,14 @@ class OpeningHours
             }
         }
   
-        // Fall back to false if nothing is found
+        // Fall back to none if nothing is found
         return false;
     }
     
-    public function OpeningHours( $hours ) {
+    public function OpeningHours( $hours, $timezone = 'UTC' ) {
         
         // Set the default timezone
-        $this->setTimeZone( 'UTC' );
+        $this->setTimeZone( $timezone );
         
         // Set the hours given
         $this->setHours( $hours );
@@ -102,6 +102,8 @@ class OpeningHours
             // Exception hours are returned directly
             return $exception;
         }
+        
+        return $out;
     }
     
     public function getHoursArray( $dateFrom, $dateTo ) {

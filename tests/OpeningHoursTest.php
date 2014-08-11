@@ -48,6 +48,22 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
         $this->assertEquals( $hours, $hoursIn[ 'Sat' ] );
     }
     
+     /**
+     * @dataProvider hoursData
+     */
+    public function testGetHoursForASpecificClosedDate( $hoursIn ) {
+        
+        // Should be a saturday
+        $date = new DateTime( '2000/07/02', new DateTimeZone( 'Europe/Copenhagen' ) );
+        
+        $openingHours = new OpeningHours( $hoursIn );
+        
+        $hours = $openingHours->getHours( $date );
+         
+        $this->assertEquals( $hours, 'closed' );
+    }
+    
+    
     /**
      * @dataProvider hoursData
      */
@@ -70,7 +86,7 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
     public function testGetHoursWithException( $hours, $exceptions ) {
         
         $decTwentyThird = new DateTime( '2014/12/23', new DateTimeZone( 'UTC' ));
-        $janFirst = new DateTime( '2014/01/01', new DateTimeZone( 'UTC' ));
+        $janFirst       = new DateTime( '2014/01/01', new DateTimeZone( 'UTC' ));
         
         $openingHours = new OpeningHours( $hours );
         
@@ -84,7 +100,8 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
         
         $this->assertEquals( $hours, $exceptions[ '2014/01/01' ] );
     }
-    
+
+   
     /**
      * @dataProvider exceptionsData
      */
@@ -136,7 +153,7 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
         $hours = $this->hoursData();
         
         $exceptions = array(
-        	'2014/01/01'   => array( null ),
+        	'2014/01/01' => 'closed',
             '2014/12/23' => array( '7:30', '20:00' )
         );
         
@@ -158,7 +175,7 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
                     'Thu' => array('11:00', '20:30'),
                     'Fri' => array('12:00', '21:30'),
                     'Sat' => array('13:00', '22:30'),
-                    'Sun' => null
+                    'Sun' => 'closed'
                 )
             ),
             array(
@@ -169,7 +186,7 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
                     'Wed' => array('10:00', '19:30'),
                     'Fri' => array('12:00', '21:30'),
                     'Sat' => array('13:00', '22:30'),
-                    'Sun' => array('14:00', '23:30')
+                    'Sun' => 'closed'
                 )
             )
     	);
