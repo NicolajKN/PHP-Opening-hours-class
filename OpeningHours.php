@@ -128,5 +128,22 @@ class OpeningHours
         
     }
     
+    public function getNextOpeningTime( $dateFrom = null ) {
+        
+        // Fall back to today for the date
+        if ( $dateFrom == null ) {
+            $dateFrom = new DateTime( 'today', $this->timezone );
+        }
+        
+        $outDate = $dateFrom;
+        
+        while ( $this->getHours( $outDate ) == 'closed' ) {
+            $outDate = $outDate->modify( '+1 day' ); 
+        }
+        
+        return $outDate;
+        
+    }
+    
 }
 

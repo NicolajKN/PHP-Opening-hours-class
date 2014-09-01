@@ -149,6 +149,25 @@ class OpeningHoursTest extends PHPUnit_Framework_TestCase
     }
     
     
+    /**
+     * @dataProvider exceptionsData
+     */
+    public function testGetNextOpeningTime( $hours, $exceptions ) {
+        
+        $dateToTest = new DateTime( '2014/9/7', new DateTimeZone( 'UTC' ) ); // A sunday
+        
+        $openingHours = new OpeningHours( $hours );
+        $openingHours->setExceptions( $exceptions );
+        
+        $nextOpeningTime = $openingHours->getNextOpeningTime( $dateToTest );
+        
+        $nextOpeningTimeString = $nextOpeningTime->format( 'Y-m-d' );
+        
+		$this->assertEquals( '2014-09-08', $nextOpeningTimeString );
+         
+    }
+    
+    
     public function exceptionsData() {
         $hours = $this->hoursData();
         
